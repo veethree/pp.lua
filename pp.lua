@@ -1,5 +1,5 @@
 -- pp.lua: A tiny helper library that helps you apply mutiple post processing shaders
--- Version 1.0
+-- Version 1.1
 
 -- MIT License
 -- 
@@ -29,15 +29,15 @@ local pp_meta = {__index = pp}
 -- Shorthands
 local lg = love.graphics
 
--- Creates and returns a new pp  object.
-function pp.new(width, height)
-    width = width or lg.getWidth()
-    height = height or lg.getHeight()
+-- Creates and returns a new pp object.
+function pp.new(w, h)
+    w = w or lg.getWidth()
+    h = h or lg.getHeight()
 
     local canvas = setmetatable({
-        main = lg.newCanvas(width, height),
-        a = lg.newCanvas(width, height),
-        b = lg.newCanvas(width, height)
+        main = lg.newCanvas(w, h),
+        a = lg.newCanvas(w, h),
+        b = lg.newCanvas(w, h)
     }, pp_meta)
 
     return canvas
@@ -52,9 +52,12 @@ function pp:drawTo(func)
     lg.setCanvas(previous_canvas)
 end
 
--- Draws the canvas object, Applying any and all shaders it gets as arguments.
+-- Draws the pp object, Applying any and all shaders it gets as arguments.
 function pp:draw(...)
     local previous_canvas = lg.getCanvas()
+    local previous_blendMode, previous_alphaMode = lg.getBlendMode()
+
+    lg.setBlendMode("alpha")
 
     lg.setCanvas(self.b)
     lg.clear()
@@ -82,6 +85,7 @@ function pp:draw(...)
     end
 
     lg.setCanvas(previous_canvas)
+    lg.setBlendMode(previous_blendMode, previous_alphaMode)
 
     lg.draw(final or self.main)
 end
